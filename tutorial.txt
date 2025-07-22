@@ -1,0 +1,16 @@
+* Requirements
+- Python 3.10.0
+- TensorFlow 2.19.0
+- Tf-keras
+- Cv2
+
+* Terminal codes:
+1. 2.19.0 TensorFlow download: pip install tensorflow
+2. cv2 download: pip install opencv-python
+3. deepface model download: pip install deepface
+4. tf-keras download: pip install tf-keras
+
+* How to setup:
+1. Create an Python 3.10 environment: py -3.10 -m venv venvName
+2. Enter venv: .\venvName\Scripts\activate
+3. Run script: python main.py
