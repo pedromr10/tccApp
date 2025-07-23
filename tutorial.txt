@@ -14,3 +14,7 @@
 1. Create an Python 3.10 environment: py -3.10 -m venv venvName
 2. Enter venv: .\venvName\Scripts\activate
 3. Run script: python main.py
+
+* References:
+- Tech With Raza
+- https://github.com/serengil/deepface

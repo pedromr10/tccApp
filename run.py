@@ -25,13 +25,41 @@ def criarDataset(nome):
             print("Nao foi possivel capturar imagem.")
             break
 
-        #deixa a imagem cinza para fazer a captura, deve facilitar (pesquisarei sobre)
+        #Aparentemente o openCv detecta faces transformando imagens coloridas em tons de cinza e depois usa o classficador haardcascade.
         gray = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGBA)
-        rostos = 
+        rostos = cv2.CascadeClassifier(cv2.data.haardcascades+"haardcascade_frontalface_default.xml").detectMultiScale(gray, 1.3, 5)
+
+        for(x, y, w, h) in rostos:
+            qtdCapturas-=1
+            img_rosto = frame[y:y+h, x:x+w]
+            caminho_rosto = os.path.join(usuario, f"{nome}_{qtdCapturas}.jpg")
+            cv2.imwrite(caminho_rosto, img_rosto)
+
+            cv2.rectangle((frame, (x,y), (x+w, y+h), (255, 0, 0)), 2)
+            cv2.imshow("Captura de face pela camera")
+
+            if cv2.waitKey(1) & 0xFF == ord('q') or qtdCapturas >= 100:
+                break
+    captura.release()
+    cv2.destroyAllWindows()
+
+#TREINAMENTO DE DATASET:
+def treinar_dataset():
+    agrupamento={}
+    for i in os.listdir(dir):
+        usuario = os.path.join(dir, i)
+        if os.path.isdir(usuario):
+            agrupamento[i] = []
+            for img_nome in  os.listdir(usuario):
+                img_caminho = os.path.join(usuario, img_nome)
+                try:
+                    agrupamento = DeepFace.represent(img_caminho, model_name = "Facenet", enforce_detection = False)[0]["agrupamento"]
+                    agrupamento[i].append(agrupamento)
+                except Exception as e:
+                    print("Erro ao treinar imagens")
+    return agrupamento
 
 
 
 
-
-
-        #OBS: cascade tirado de: https://github.com/opencv/opencv/blob/master/data/haarcascades/haarcascade_frontalface_default.xml
+#OBS: cascade tirado de: https://github.com/opencv/opencv/blob/master/data/haarcascades/haarcascade_frontalface_default.xml
