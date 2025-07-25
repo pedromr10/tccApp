@@ -71,6 +71,8 @@ def treinar_dataset():
 
 def reconhecimento_facial(agrupamentos):
     captura = cv2.VideoCapture(0)
+    face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+
     while True:
         ret, frame = captura.read()
         if not ret:
@@ -78,43 +80,52 @@ def reconhecimento_facial(agrupamentos):
             break
 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-        rostos = cv2.CascadeClassifier("haarcascade_frontalface_default.xml").detectMultiScale(gray, 1.3, 5)
+        rostos = face_cascade.detectMultiScale(gray, 1.3, 5)
         
-        for(x,y,w,h) in rostos:
-            img_rostos = frame[y:y+h, x:x+w]
-            cv2.rectangle(frame, (x,y), (x+w, y+h), (255, 0, 0), 2)
-            try:
-                analyse = DeepFace.analyse(img_rostos, actions = ["age", "emotion"], enforce_detection = False)
-                if isinstance(analyse, list):
-                    analyse = analyse[0]
-                age = analyse["age"]
-                emotion = max(analyse["emotion"], key=analyse["emotion"].get)
+        for (x, y, w, h) in rostos:
+            img_rosto = frame[y:y+h, x:x+w]
+            cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
-                face_embedding = DeepFace.represent(img_rostos, model_name = "Facenet", enforce_detection = False)[0]["embedding"]
+            try:
+                # CORREÇÃO AQUI: era "analyse", o correto é "analyze"
+                analysis = DeepFace.analyze(img_rosto, actions=["age", "emotion"], enforce_detection=False)
+                if isinstance(analysis, list):
+                    analysis = analysis[0]
+
+                age = analysis.get("age", "N/A")
+                emotion = max(analysis["emotion"], key=analysis["emotion"].get)
+
+                face_embedding = DeepFace.represent(img_rosto, model_name="Facenet", enforce_detection=False)[0]["embedding"]
 
                 match = None
                 max_similarity = -1
-                for i, person_embedding in agrupamentos.items():
-                    for embed in person_embedding:
-                        similarity = np.dot(face_embedding, embed)/(np.linalg.norm(face_embedding)* np.linalg.norm(embed))
-                        if similarity>max_similarity:
+                for pessoa, embeddings in agrupamentos.items():
+                    for embed in embeddings:
+                        similarity = np.dot(face_embedding, embed) / (np.linalg.norm(face_embedding) * np.linalg.norm(embed))
+                        if similarity > max_similarity:
                             max_similarity = similarity
-                            match =i 
+                            match = pessoa
+
                 if max_similarity > 0.7:
                     label = f"{match} ({max_similarity:.2f})"
                 else:
-                    label = "pessoa nao reconhecida"
-                display_text = f"{label}, Age: {int(age)}, Emotion: {emotion}"
-                cv2.putText(frame, display_text, (x,y,-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                    label = "Pessoa nao reconhecida"
+
+                display_text = f"{label}, Idade: {int(age)}, Emocao: {emotion}"
+                cv2.putText(frame, display_text, (x, y - 10),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+
             except Exception as e:
-                print("nao foi possivel reconhecer rostos")
+                print("Nao foi possivel reconhecer rosto:", e)
+
         cv2.imshow("Reconhecimento facial", frame)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+
     captura.release()
     cv2.destroyAllWindows()
+
 
 #OUTPUT:
 if __name__ == "__main__":
