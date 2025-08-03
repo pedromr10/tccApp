@@ -1,10 +1,28 @@
-import cv2
+import cv2, os
 from deepface import DeepFace
+
+# Diretório base
+base_dir = "dataset"
+os.makedirs(base_dir, exist_ok=True)
+
+# Exigir nome do usuário
+nome_user = input("Digite seu nome: ").strip().lower().replace(" ", "_")
+
+usuario_dir = os.path.join(base_dir, nome_user)
+nome_cont = 1
+while os.path.exists(usuario_dir):
+    usuario_dir = os.path.join(base_dir, f"{nome_user}_{nome_cont}")
+    nome_cont += 1
+
+os.makedirs(usuario_dir)
 
 # Inicia a webcam (0 = câmera padrão)
 cap = cv2.VideoCapture(0)
 
 print("Pressione 'q' para sair.")
+
+# Contador de cada emoção
+cont_emocoes = {}
 
 while True:
     ret, frame = cap.read()
@@ -30,6 +48,17 @@ while True:
         with open("emotionResults.txt", "a", encoding="utf-8") as f:
             f.write(emotion + "\n")
 
+        # Criar a pasta da emoção se ela não existir
+        emotion_dir = os.path.join(usuario_dir, emotion)
+        os.makedirs(emotion_dir, exist_ok=True)
+
+        cont_emocoes.setdefault(emotion, 0)
+
+        if(cont_emocoes[emotion] < 100):
+            cont_emocoes[emotion] += 1
+            # Salvar o frame na pasta de emoção correta
+            filename = os.path.join(emotion_dir, f"{emotion}_{cont_emocoes[emotion]}.jpg")
+            cv2.imwrite(filename, frame)
 
     except Exception as e:
         print("Erro na analise:", e)

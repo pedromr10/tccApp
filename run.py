@@ -57,7 +57,7 @@ def treinar_dataset():
         usuario = os.path.join(dir, i)
         if os.path.isdir(usuario):
             agrupamento[i] = []
-            for img_nome in  os.listdir(usuario):
+            for img_nome in os.listdir(usuario):
                 img_caminho = os.path.join(usuario, img_nome)
                 try:
                     embedding = DeepFace.represent(img_caminho, model_name="Facenet", enforce_detection=False)[0]["embedding"]

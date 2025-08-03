@@ -1,0 +1,7 @@
+.venv/
+app/_pycache_/
+app/routes/_pycache_/
+app/models/_pycache_/
+estrutura.txt
+estruturaDB.txt
+*.csv
