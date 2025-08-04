@@ -13,8 +13,13 @@
 * How to setup:
 1. Create an Python 3.10 environment: py -3.10 -m venv venvName
 2. Enter venv: .\venvName\Scripts\activate
-3. Run script: python main.py
+3. Run script: python run.py
+4. Follow all three steps
 
 * References:
 - Tech With Raza
 - https://github.com/serengil/deepface
+
+* More Infos:
+- main.py foi a primeira versão do código. Sendo mais simples e mais tranquila de rodar. É mantido no código apenas para lembranças;
+- run.py é o código principal, onde é será desenvolvido o projeto.
