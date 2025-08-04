@@ -71,6 +71,12 @@ def criarDataset(nome):
         if cv2.waitKey(1) & 0xFF == ord('q'):
             print("Captura interrompida.")
             break
+        
+        if qtdCapturas <= 0:
+            print("Gostaria de continuar capturando imagens?")
+            continuar_captura = int(input("1. SIM | 2. NAO "))
+            if continuar_captura == 1:
+                qtdCapturas = 100
 
     captura.release()
     cv2.destroyAllWindows()
