@@ -87,12 +87,10 @@ def reconhecimento_facial(agrupamentos):
             cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
             try:
-                # CORREÇÃO AQUI: era "analyse", o correto é "analyze"
-                analysis = DeepFace.analyze(img_rosto, actions=["age", "emotion"], enforce_detection=False)
+                analysis = DeepFace.analyze(img_rosto, actions=["emotion"], enforce_detection=False)
                 if isinstance(analysis, list):
                     analysis = analysis[0]
 
-                age = analysis.get("age", "N/A")
                 emotion = max(analysis["emotion"], key=analysis["emotion"].get)
 
                 face_embedding = DeepFace.represent(img_rosto, model_name="Facenet", enforce_detection=False)[0]["embedding"]
@@ -111,12 +109,12 @@ def reconhecimento_facial(agrupamentos):
                 else:
                     label = "Pessoa nao reconhecida"
 
-                display_text = f"{label}, Idade: {int(age)}, Emocao: {emotion}"
+                display_text = f"Nome: {label} | Emocao: {emotion}"
                 cv2.putText(frame, display_text, (x, y - 10),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
             except Exception as e:
-                print("Nao foi possivel reconhecer rosto:", e)
+                print("Nao foi possivel reconhecer rosto: ", e)
 
         cv2.imshow("Reconhecimento facial", frame)
 
@@ -133,7 +131,7 @@ if __name__ == "__main__":
     
     escolha = int(input("Escolha a opcao: "))
     if escolha == 1:
-        name = input("Digite seu nome:")
+        name = input("Digite seu nome: ")
         criarDataset(name)
     elif escolha == 2:
         embedding = treinar_dataset()
