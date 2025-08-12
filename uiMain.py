@@ -13,21 +13,12 @@ os.makedirs(dir, exist_ok=True)
 
 #FUNCOES:
 def criarDataset(nome):
-    nome_usuario = nome.strip().lower().replace(" ", "_")
-    usuario_dir = os.path.join(dir, nome_usuario)
-
-    nome_usuario_cont = 1
-    while os.path.exists(usuario_dir):
-        usuario_dir = os.path.join(dir, f"{nome_usuario}_{nome_usuario_cont}")
-        nome_usuario_cont += 1
-
-    os.makedirs(usuario_dir, exist_ok=True)
+    usuario = os.path.join(dir, nome)
+    os.makedirs(usuario, exist_ok=True)
 
     captura = cv2.VideoCapture(0)
     qtdCapturas = 100
     face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
-
-    cont_emocoes = {}
 
     while qtdCapturas > 0:
         ret, frame = captura.read()
@@ -40,45 +31,21 @@ def criarDataset(nome):
 
         for (x, y, w, h) in rostos:
             img_rosto = frame[y:y+h, x:x+w]
+            caminho_rosto = os.path.join(usuario, f"{nome}_{100 - qtdCapturas + 1}.jpg")
+            cv2.imwrite(caminho_rosto, img_rosto)
+            qtdCapturas -= 1
 
-            try:
-                result = DeepFace.analyze(img_rosto, actions=['emotion'], enforce_detection=False)
-                emotion = result[0]["dominant_emotion"] if isinstance(result, list) else result["dominant_emotion"]
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
+            # Exibe quantas imagens faltam
+            cv2.putText(frame, f"Faltam: {qtdCapturas}", (10, 30),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            break  # salva só uma face por frame
 
-                cont_emocoes.setdefault(emotion, 0)
-                if cont_emocoes[emotion] < 100:
-                    cont_emocoes[emotion] += 1
-                    emotion_dir = os.path.join(usuario_dir, emotion)
-                    os.makedirs(emotion_dir, exist_ok=True)
-                    nome_arquivo = f"{emotion}_{cont_emocoes[emotion]}.jpg"
-                    caminho_arquivo = os.path.join(emotion_dir, nome_arquivo)
-                    cv2.imwrite(caminho_arquivo, img_rosto)
+        cv2.imshow("Captura de face pela camera", frame)
 
-                    # Salva a emoção num .txt
-                    with open(os.path.join(usuario_dir, "emotions.txt"), "a", encoding="utf-8") as f:
-                        f.write(f"{emotion}\n")
-
-                    qtdCapturas -= 1
-
-                cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
-                cv2.putText(frame, f"{emotion} | Faltam: {qtdCapturas}", (10, 30),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
-
-            except Exception as e:
-                print("Erro ao analisar emoção:", e)
-
-            break  # captura só um rosto por frame
-
-        cv2.imshow("Captura de face e emoção", frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
-            print("Captura interrompida.")
+            print("Captura interrompida pelo usuario.")
             break
-        
-        if qtdCapturas <= 0:
-            print("Gostaria de continuar capturando imagens?")
-            continuar_captura = int(input("1. SIM | 2. NAO "))
-            if continuar_captura == 1:
-                qtdCapturas = 100
 
     captura.release()
     cv2.destroyAllWindows()
