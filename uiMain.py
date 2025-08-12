@@ -57,20 +57,19 @@ def treinarDataset():
         usuario = os.path.join(dir, i)
         if os.path.isdir(usuario):
             agrupamento[i] = []
-            for emotion_folder in os.listdir(usuario):
-                emotion_dir = os.path.join(usuario, emotion_folder)
-                if os.path.isdir(emotion_dir):
-                    for img_nome in os.listdir(emotion_dir):
-                        img_caminho = os.path.join(emotion_dir, img_nome)
+            for img_nome in os.listdir(usuario):
+                img_caminho = os.path.join(usuario, img_nome)
 
-                        try:
-                            embedding = DeepFace.represent(img_caminho, model_name="Facenet", enforce_detection=False)[0]["embedding"]
-                            agrupamento[i].append(embedding)
-                        except Exception as e:
-                            print("Erro ao treinar imagens:", e)
+                try:
+                    embedding = DeepFace.represent(img_caminho, model_name="Facenet", enforce_detection=False)[0]["embedding"]
+                    agrupamento[i].append(embedding)
+                except Exception as e:
+                    print("Erro ao treinar imagem:", e)
+
     np.save("embedding.npy", agrupamento)
     print("Treinamento finalizado.")
     return agrupamento
+
 
 def mostrarEmocao(agrupamentos):
     captura = cv2.VideoCapture(0)
@@ -158,10 +157,15 @@ nome = tk.Entry(janela, font=("Arial", 20))
 nome.pack(pady=10)
 nome.configure(bg="#667f98", fg="white")
 
-# Botão Criar Dataset:
-botaoDataset = tk.Button(janela, font=("Arial", 16), text="Criar Dataset", command=lambda: criarMaisTreinarDataset(nome.get()))
+#Botao Criar Dataset:
+botaoDataset = tk.Button(janela, font=("Arial", 16), text="Criar Dataset", command=lambda: criarDataset(nome.get()))
 botaoDataset.pack(pady=10)
 botaoDataset.configure(bg="#667f98", fg="white")
+
+#botao para treinar o dataset para reconhecimento de perfil (pro deepface saber que vc é vc!!!):
+botaoTreinamento = tk.Button(janela, font=("Arial", 16), text= "Treinar dataset", command=treinarDataset)
+botaoTreinamento.pack()
+botaoTreinamento.configure(bg="#667f98", fg="white")
 
 # Botão Mostrar Emoções:
 botaoEmocao = tk.Button(janela, font=("Arial", 16), text="Iniciar Reconhecimento", command=reconhecimentoEmocao)

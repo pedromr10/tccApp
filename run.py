@@ -179,7 +179,7 @@ if __name__ == "__main__":
             embedding = np.load("embedding.npy", allow_pickle = True).item()
             reconhecimento_facial(embedding)
         else:
-            print("arquivo nao")
+            print("arquivo nao reconhecido")
 
 
 #OBS: cascade tirado de: https://github.com/opencv/opencv/blob/master/data/haarcascades/haarcascade_frontalface_default.xml
