@@ -12,44 +12,84 @@ os.makedirs(dir, exist_ok=True)
 
 
 #FUNCOES:
+def detectarCamera():
+    for i in range(5):
+        cap = cv2.VideoCapture(i, cv2.CAP_DSHOW)
+        ret, frame = cap.read()
+        if ret:
+            return cap
+        cap.release()
+    print("Nenhuma câmera encontrada")
+    return None
+
 def criarDataset(nome):
-    usuario = os.path.join(dir, nome)
-    os.makedirs(usuario, exist_ok=True)
 
-    captura = cv2.VideoCapture(0)
-    qtdCapturas = 100
-    face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+    def iniciar_captura():
+        try:
+            qtd = int(qtdInserida.get())
+        except ValueError:
+            print("Valor inválido")
+            return
+        
+        nomeBase = nome.strip().lower().replace(" ", "_")
 
-    while qtdCapturas > 0:
-        ret, frame = captura.read()
-        if not ret:
-            print("Nao foi possivel capturar imagem.")
-            break
+        contNome = 1
+        usuario = os.path.join(dir, f"{nomeBase}_{contNome}")
+        while os.path.exists(usuario):
+            contNome += 1
+            usuario = os.path.join(dir, f"{nomeBase}_{contNome}")
 
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        rostos = face_cascade.detectMultiScale(gray, 1.3, 5)
+        os.makedirs(usuario, exist_ok=True)
 
-        for (x, y, w, h) in rostos:
-            img_rosto = frame[y:y+h, x:x+w]
-            caminho_rosto = os.path.join(usuario, f"{nome}_{100 - qtdCapturas + 1}.jpg")
-            cv2.imwrite(caminho_rosto, img_rosto)
-            qtdCapturas -= 1
+        captura = detectarCamera()
+        if captura is None:
+            print("Nenhuma câmera disponível")
+            return
 
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
-            # Exibe quantas imagens faltam
-            cv2.putText(frame, f"Faltam: {qtdCapturas}", (10, 30),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-            break  # salva só uma face por frame
+        face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 
-        cv2.imshow("Captura de face pela camera", frame)
+        qtdCapturas = qtd
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            print("Captura interrompida pelo usuario.")
-            break
+        while qtdCapturas > 0:
+            ret, frame = captura.read()
+            if not ret:
+                print("Nao foi possivel capturar imagem.")
+                break
 
-    captura.release()
-    cv2.destroyAllWindows()
-    print("Captura finalizada.")
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            rostos = face_cascade.detectMultiScale(gray, 1.3, 5)
+
+            for (x, y, w, h) in rostos:
+                img_rosto = frame[y:y+h, x:x+w]
+                caminho_rosto = os.path.join(usuario, f"{nomeBase}_{contNome}_{qtd - qtdCapturas + 1}.jpg")
+                cv2.imwrite(caminho_rosto, img_rosto)
+                qtdCapturas -= 1
+
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
+                # Exibe quantas imagens faltam
+                cv2.putText(frame, f"Faltam: {qtdCapturas}", (10, 30),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                break  # salva só uma face por frame
+
+            cv2.imshow("Captura de face pela camera", frame)
+
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                print("Captura interrompida pelo usuario.")
+                break
+
+        captura.release()
+        cv2.destroyAllWindows()
+        print("Captura finalizada.")
+
+    janelaQtdCapturas = tk.Toplevel()
+    janelaQtdCapturas.title("Quantidade de capturas desejadas")
+    janelaQtdCapturas.geometry("600x400")
+    janelaQtdCapturas.configure(bg="#3e4e60")
+    tk.Label(janelaQtdCapturas, text="Quantidade de capturas: ", font=("Arial", 36), bg="#3e4e60", fg="white").pack(pady=10)
+
+    qtdInserida = tk.Entry(janelaQtdCapturas, font=("Arial", 36), bg="#3e4e60", fg="white")
+    qtdInserida.pack(pady=10)
+    tk.Button(janelaQtdCapturas, text="Iniciar", font=("Arial", 36), command=iniciar_captura, bg="#3e4e60", fg="white").pack(pady=10)
 
 def treinarDataset():
     agrupamento = {}
@@ -70,9 +110,13 @@ def treinarDataset():
     print("Treinamento finalizado.")
     return agrupamento
 
-
 def mostrarEmocao(agrupamentos):
-    captura = cv2.VideoCapture(0)
+    
+    captura = detectarCamera()
+    if captura is None:
+        print("Nenhuma câmera disponível")
+        return
+    
     face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 
     while True:
@@ -125,12 +169,12 @@ def mostrarEmocao(agrupamentos):
 
     captura.release()
     cv2.destroyAllWindows()
-
+'''
 # Deixar automático o treinamento do dataset
 def criarMaisTreinarDataset(nome_usuario):
     criarDataset(nome_usuario)
     treinarDataset()
-
+'''
 # Só permite o reconhecimento facial caso o dataset esteja treinado
 def reconhecimentoEmocao():
     if os.path.exists("embedding.npy"):
