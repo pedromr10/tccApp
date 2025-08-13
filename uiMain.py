@@ -1,17 +1,17 @@
-#IMPORTS:
+# IMPORTS:
 import tkinter as tk
+from tkinter import ttk
+import threading
 import os
 import cv2
 import numpy as np
 from deepface import DeepFace
 
-#Criar dataset, antes de tudo:
+# Criar dataset, antes de tudo:
 dir = "Dataset"
 os.makedirs(dir, exist_ok=True)
 
-
-
-#FUNCOES:
+# FUNCOES:
 def detectarCamera():
     for i in range(5):
         cap = cv2.VideoCapture(i, cv2.CAP_DSHOW)
@@ -24,13 +24,7 @@ def detectarCamera():
 
 def criarDataset(nome):
 
-    def iniciar_captura():
-        try:
-            qtd = int(qtdInserida.get())
-        except ValueError:
-            print("Valor inválido")
-            return
-        
+    def iniciar_captura(qtd):
         nomeBase = nome.strip().lower().replace(" ", "_")
 
         contNome = 1
@@ -66,10 +60,9 @@ def criarDataset(nome):
                 qtdCapturas -= 1
 
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
-                # Exibe quantas imagens faltam
                 cv2.putText(frame, f"Faltam: {qtdCapturas}", (10, 30),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-                break  # salva só uma face por frame
+                break
 
             cv2.imshow("Captura de face pela camera", frame)
 
@@ -81,17 +74,35 @@ def criarDataset(nome):
         cv2.destroyAllWindows()
         print("Captura finalizada.")
 
+    def iniciar_captura_de_verdade(janelaBarra=None):
+        try:
+            qtd = int(qtdInserida.get())
+        except ValueError:
+            print("Valor inválido")
+            if janelaBarra:
+                janelaBarra.destroy()
+            return
+
+        janelaQtdCapturas.destroy()
+        iniciar_captura(qtd)
+
     janelaQtdCapturas = tk.Toplevel()
     janelaQtdCapturas.title("Quantidade de capturas desejadas")
     janelaQtdCapturas.geometry("600x400")
     janelaQtdCapturas.configure(bg="#3e4e60")
-    tk.Label(janelaQtdCapturas, text="Quantidade de capturas: ", font=("Arial", 36), bg="#3e4e60", fg="white").pack(pady=10)
+
+    tk.Label(janelaQtdCapturas, text="Quantidade de capturas: ", font=("Arial", 36),
+             bg="#3e4e60", fg="white").pack(pady=10)
 
     qtdInserida = tk.Entry(janelaQtdCapturas, font=("Arial", 36), bg="#3e4e60", fg="white")
     qtdInserida.pack(pady=10)
-    tk.Button(janelaQtdCapturas, text="Iniciar", font=("Arial", 36), command=iniciar_captura, bg="#3e4e60", fg="white").pack(pady=10)
 
-def treinarDataset():
+    tk.Button(janelaQtdCapturas, text="Iniciar", font=("Arial", 36),
+              command=lambda: barraDeCarregamento(iniciar_captura_de_verdade),
+              bg="#3e4e60", fg="white").pack(pady=10)
+
+def treinarDataset(janelaBarra=None):
+
     agrupamento = {}
     for i in os.listdir(dir):
         usuario = os.path.join(dir, i)
@@ -110,13 +121,16 @@ def treinarDataset():
     print("Treinamento finalizado.")
     return agrupamento
 
-def mostrarEmocao(agrupamentos):
-    
+def mostrarEmocao(agrupamentos, janelaBarra=None):
+
+    if janelaBarra:
+        janelaBarra.destroy()
+
     captura = detectarCamera()
     if captura is None:
         print("Nenhuma câmera disponível")
         return
-    
+
     face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 
     while True:
@@ -169,20 +183,37 @@ def mostrarEmocao(agrupamentos):
 
     captura.release()
     cv2.destroyAllWindows()
-'''
-# Deixar automático o treinamento do dataset
-def criarMaisTreinarDataset(nome_usuario):
-    criarDataset(nome_usuario)
-    treinarDataset()
-'''
-# Só permite o reconhecimento facial caso o dataset esteja treinado
-def reconhecimentoEmocao():
+
+def reconhecimentoEmocao(janelaBarra=None):
     if os.path.exists("embedding.npy"):
         agrupamentos = np.load("embedding.npy", allow_pickle=True).item()
-        mostrarEmocao(agrupamentos)
+        mostrarEmocao(agrupamentos, janelaBarra)
     else:
         print("É necessário criar um dataset antes de realizar o reconhecimento!")
 
+# Barra de carregamento
+def barraDeCarregamento(func, *args):
+    janelaBarraDeCarregamento = tk.Toplevel()
+    janelaBarraDeCarregamento.title("Carregando...")
+    janelaBarraDeCarregamento.geometry("300x100")
+    janelaBarraDeCarregamento.configure(bg="#3e4e60")
+
+    tk.Label(janelaBarraDeCarregamento, text="Por favor, aguarde alguns instantes...",
+             font=("Arial", 20), bg="#3e4e60", fg="white").pack(pady=10)
+
+    barra = ttk.Progressbar(janelaBarraDeCarregamento, orient="horizontal",
+                            length=300, mode="indeterminate")
+    barra.pack(pady=5)
+    barra.start()
+
+    def tarefa():
+        try:
+            func(*args)
+        finally:
+            barra.stop()
+            janelaBarraDeCarregamento.destroy()
+
+    threading.Thread(target=tarefa).start()
 
 #CODIGO DA UI:
 # Tela Inicial:
@@ -207,12 +238,12 @@ botaoDataset.pack(pady=10)
 botaoDataset.configure(bg="#667f98", fg="white")
 
 #botao para treinar o dataset para reconhecimento de perfil (pro deepface saber que vc é vc!!!):
-botaoTreinamento = tk.Button(janela, font=("Arial", 16), text= "Treinar dataset", command=treinarDataset)
+botaoTreinamento = tk.Button(janela, font=("Arial", 16), text= "Treinar dataset", command=lambda: barraDeCarregamento(treinarDataset))
 botaoTreinamento.pack()
 botaoTreinamento.configure(bg="#667f98", fg="white")
 
 # Botão Mostrar Emoções:
-botaoEmocao = tk.Button(janela, font=("Arial", 16), text="Iniciar Reconhecimento", command=reconhecimentoEmocao)
+botaoEmocao = tk.Button(janela, font=("Arial", 16), text="Iniciar Reconhecimento", command=lambda: barraDeCarregamento(reconhecimentoEmocao))
 botaoEmocao.pack()
 botaoEmocao.configure(bg="#667f98", fg="white")
 
