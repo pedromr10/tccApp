@@ -152,6 +152,7 @@ def mostrarEmocao(agrupamentos, janelaBarra=None):
                     analysis = analysis[0]
 
                 emotion = max(analysis["emotion"], key=analysis["emotion"].get)
+                print("Emocao detectada: " + emotion)
 
                 face_embedding = DeepFace.represent(img_rosto, model_name="Facenet", enforce_detection=False)[0]["embedding"]
 
@@ -195,7 +196,7 @@ def reconhecimentoEmocao(janelaBarra=None):
 def barraDeCarregamento(func, *args):
     janelaBarraDeCarregamento = tk.Toplevel()
     janelaBarraDeCarregamento.title("Carregando...")
-    janelaBarraDeCarregamento.geometry("300x100")
+    janelaBarraDeCarregamento.geometry("600x100")
     janelaBarraDeCarregamento.configure(bg="#3e4e60")
 
     tk.Label(janelaBarraDeCarregamento, text="Por favor, aguarde alguns instantes...",
