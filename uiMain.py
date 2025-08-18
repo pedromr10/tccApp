@@ -152,6 +152,8 @@ def mostrarEmocao(agrupamentos, janelaBarra=None):
                     analysis = analysis[0]
 
                 emotion = max(analysis["emotion"], key=analysis["emotion"].get)
+
+                #print da emocao detectada no cmd, para verificacao:
                 print("Emocao detectada: " + emotion)
 
                 face_embedding = DeepFace.represent(img_rosto, model_name="Facenet", enforce_detection=False)[0]["embedding"]
@@ -167,6 +169,14 @@ def mostrarEmocao(agrupamentos, janelaBarra=None):
 
                 if max_similarity > 0.7:
                     label = f"{match} ({max_similarity:.2f})"
+                    pasta_pessoa = os.path.join(dir, match)
+                    os.makedirs(pasta_pessoa, exist_ok=True)
+                    pasta_emocao = os.path.join(pasta_pessoa, emotion)
+                    os.makedirs(pasta_emocao, exist_ok=True)
+                    nome_arquivo = f"{emotion}_{len(os.listdir(pasta_emocao))+1}.jpg"
+                    caminho_arquivo = os.path.join(pasta_emocao, nome_arquivo)
+
+                    cv2.imwrite(caminho_arquivo, img_rosto)
                 else:
                     label = "Pessoa nao reconhecida"
 
