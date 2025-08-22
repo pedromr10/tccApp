@@ -250,12 +250,12 @@ botaoDataset.configure(bg="#667f98", fg="white")
 
 #botao para treinar o dataset para reconhecimento de perfil (pro deepface saber que vc é vc!!!):
 botaoTreinamento = tk.Button(janela, font=("Arial", 16), text= "Treinar dataset", command=lambda: barraDeCarregamento(treinarDataset))
-botaoTreinamento.pack()
+botaoTreinamento.pack(pady=10)
 botaoTreinamento.configure(bg="#667f98", fg="white")
 
 # Botão Mostrar Emoções:
 botaoEmocao = tk.Button(janela, font=("Arial", 16), text="Iniciar Reconhecimento", command=lambda: barraDeCarregamento(reconhecimentoEmocao))
-botaoEmocao.pack()
+botaoEmocao.pack(pady=10)
 botaoEmocao.configure(bg="#667f98", fg="white")
 
 janela.mainloop()
