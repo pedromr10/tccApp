@@ -1,2 +1,2 @@
-# deepfaceTest
-teste do modelo deepface para reconhecimento facial
+# Tcc App
+Aplicativo / software sendo desenvolvido para o TCC.
