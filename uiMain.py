@@ -23,10 +23,14 @@ def detectarCamera():
     return None
 
 def criarDataset(nome):
-
+    #alem de tirar as fotos, faz uma copia mais escura e uma mais clara para um melhor treinamento
+    #e deteccao posteriormente.
     def iniciar_captura(qtd):
         nomeBase = nome.strip().lower().replace(" ", "_")
-
+        #valores para o data augmentation:
+        valor_claro = 50
+        valor_escuro = -55
+        
         contNome = 1
         usuario = os.path.join(dir, f"{nomeBase}_{contNome}")
         while os.path.exists(usuario):
@@ -55,8 +59,23 @@ def criarDataset(nome):
 
             for (x, y, w, h) in rostos:
                 img_rosto = frame[y:y+h, x:x+w]
+
+                #caminhos para salvamento das imagens dos rostos:
                 caminho_rosto = os.path.join(usuario, f"{nomeBase}_{contNome}_{qtd - qtdCapturas + 1}.jpg")
+                caminho_rosto_claro = os.path.join(usuario, f"{nomeBase}_{contNome}_{qtd - qtdCapturas + 1}_claro.jpg")
+                caminho_rosto_escuro = os.path.join(usuario, f"{nomeBase}_{contNome}_{qtd - qtdCapturas + 1}_escuro.jpg")
+                
+                #salvamento da imagem original:
                 cv2.imwrite(caminho_rosto, img_rosto)
+
+                #alterando as imagens:
+                img_clara = cv2.convertScaleAbs(img_rosto, alpha=1, beta=valor_claro)
+                img_escura = cv2.convertScaleAbs(img_rosto, alpha=1, beta=valor_escuro)
+                #salvamento da imagem mais clara:
+                cv2.imwrite(caminho_rosto_claro, img_clara)
+                #salvamento da imagem mais escura:
+                cv2.imwrite(caminho_rosto_claro, img_escura)
+
                 qtdCapturas -= 1
 
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
