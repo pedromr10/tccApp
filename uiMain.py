@@ -208,7 +208,7 @@ def mostrarEmocao(agrupamentos, janelaBarra=None):
 
                 display_text = f"Nome: {label} | Emocao: {emotion}"
                 cv2.putText(frame, display_text, (x, y - 10),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
             except Exception as e:
                 print("Nao foi possivel reconhecer rosto: ", e)
