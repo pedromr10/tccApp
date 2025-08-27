@@ -1,6 +1,9 @@
 #IMPORTS:
 import os, cv2
 from ultralytics import YOLO
+import pyautogui #para tirar print da tela do usuario
+import time #para tirar print de tempo em tempo
+import keyboard
 
 
 #MAIN CODE:
@@ -12,6 +15,21 @@ datasets_emocoes = "Dataset"
 
 pasta_gameplays = "Gameplay"
 os.makedirs(pasta_gameplays, exist_ok=True)
+
+#tira print da tela a cada segundo, parando apenas quando o usuario digitar q:
+contador = 1
+while True:
+    if keyboard.is_pressed('q'):
+        print("Captura encerrada pelo usuário.")
+        break
+
+    print = pyautogui.screenshot()
+    nome_arquivo = f"screenshot_{contador}.png"
+    caminho_arquivo = os.path.join(pasta_gameplays, nome_arquivo)
+    print.save(caminho_arquivo)
+    contador += 1
+    time.sleep(1)
+
 
 #carrega o modelo pre treinado do yolo
 model = YOLO('yolov8x.pt')  # versão pequena, rápida
@@ -43,3 +61,4 @@ for i, img in enumerate(imagens):
     cv2.imwrite(saida, frame_pronto)
 
     print(f"Salvo: {saida}")
+    
