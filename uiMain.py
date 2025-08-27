@@ -248,14 +248,19 @@ def barraDeCarregamento(func, *args):
 #CODIGO DA UI:
 # Tela Inicial:
 janela = tk.Tk()
-janela.title("Identificador de Emoções")
-janela.geometry("1024x768")
+janela.title("Ferramenta facilitadora de criacao de datasets")
+janela.geometry("650x400")
 janela.configure(bg="#3e4e60")
 
 # Título:
-titulo = tk.Label(janela, text="TCC", font=("Arial", 36))
+titulo = tk.Label(janela, text="Ferramenta facilitadora\nde criação de datasets", font=("Arial", 24))
 titulo.pack(pady=10)
 titulo.configure(bg="#3e4e60", fg="white")
+
+# nome usuario:
+nomeusu = tk.Label(janela, text="Digite seu nome:", font=("Arial", 16))
+nomeusu.pack(pady=10)
+nomeusu.configure(bg="#3e4e60", fg="white")
 
 # Nome do Usuário:
 nome = tk.Entry(janela, font=("Arial", 20))
