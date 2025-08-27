@@ -2,8 +2,7 @@
 import tkinter as tk
 from tkinter import ttk
 import threading
-import os
-import cv2
+import os, cv2, mss
 import numpy as np
 from deepface import DeepFace
 
@@ -152,7 +151,15 @@ def mostrarEmocao(agrupamentos, janelaBarra=None):
 
     face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 
+    # Capturar tela
+    sct = mss.mss()
+    monitor = sct.monitors[1]
+
     while True:
+
+        tela = np.array(sct.grab(monitor))
+        tela = cv2.cvtColor(tela, cv2.COLOR_BGRA2BGR)
+
         ret, frame = captura.read()
         if not ret:
             print("Falha na captura de imagem")
@@ -206,7 +213,12 @@ def mostrarEmocao(agrupamentos, janelaBarra=None):
             except Exception as e:
                 print("Nao foi possivel reconhecer rosto: ", e)
 
-        cv2.imshow("Reconhecimento facial", frame)
+        h_webcam, w_webcam = 200, 260
+        webcam_resized = cv2.resize(frame, (w_webcam, h_webcam))
+
+        tela[0:h_webcam, 0:w_webcam] = webcam_resized
+
+        cv2.imshow("Reconhecimento facial", tela)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
