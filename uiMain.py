@@ -10,6 +10,11 @@ from deepface import DeepFace
 dir = "Dataset"
 os.makedirs(dir, exist_ok=True)
 
+# Carrega o modelo DNN:
+modelFile = "res10_300x300_ssd_iter_140000.caffemodel"
+configFile = "deploy.prototxt"
+net = cv2.dnn.readNetFromCaffe(configFile, modelFile)
+
 # FUNCOES:
 def detectarCamera():
     for i in range(5):
@@ -20,6 +25,22 @@ def detectarCamera():
         cap.release()
     print("Nenhuma câmera encontrada")
     return None
+
+def detectarFace(frame, conf_threashold=0.8):
+    (h, w) = frame.shape[:2]
+    blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
+
+    net.setInput(blob)
+    detections = net.forward()
+    rostos = []
+
+    for i in range (0, detections.shape[2]):
+        confidence = detections[0, 0, i, 2]
+        if confidence > conf_threashold:
+            box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+            (x1, y1, x2, y2) = box.astype("int")
+            rostos.append((x1, y1, x2 - x1, y2 - y1))
+    return rostos
 
 def criarDataset(nome):
     #alem de tirar as fotos, faz uma copia mais escura e uma mais clara para um melhor treinamento
@@ -43,8 +64,6 @@ def criarDataset(nome):
             print("Nenhuma câmera disponível")
             return
 
-        face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
-
         qtdCapturas = qtd
 
         while qtdCapturas > 0:
@@ -53,8 +72,7 @@ def criarDataset(nome):
                 print("Nao foi possivel capturar imagem.")
                 break
 
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            rostos = face_cascade.detectMultiScale(gray, 1.3, 5)
+            rostos = detectarFace(frame, conf_threashold=0.8)
 
             for (x, y, w, h) in rostos:
                 img_rosto = frame[y:y+h, x:x+w]
@@ -149,8 +167,6 @@ def mostrarEmocao(agrupamentos, janelaBarra=None):
         print("Nenhuma câmera disponível")
         return
 
-    face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
-
     # Capturar tela
     sct = mss.mss()
     monitor = sct.monitors[1]
@@ -165,8 +181,7 @@ def mostrarEmocao(agrupamentos, janelaBarra=None):
             print("Falha na captura de imagem")
             break
 
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        rostos = face_cascade.detectMultiScale(gray, 1.3, 5)
+        rostos = detectarFace(frame, conf_threashold=0.8)
 
         for (x, y, w, h) in rostos:
             img_rosto = frame[y:y+h, x:x+w]
@@ -213,7 +228,7 @@ def mostrarEmocao(agrupamentos, janelaBarra=None):
             except Exception as e:
                 print("Nao foi possivel reconhecer rosto: ", e)
 
-        h_webcam, w_webcam = 200, 260
+        h_webcam, w_webcam = 400, 460
         webcam_resized = cv2.resize(frame, (w_webcam, h_webcam))
 
         tela[0:h_webcam, 0:w_webcam] = webcam_resized
