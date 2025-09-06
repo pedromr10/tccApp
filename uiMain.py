@@ -2,7 +2,7 @@
 import tkinter as tk
 from tkinter import ttk
 import threading
-import os, cv2, mss
+import os, cv2, mss, time
 import numpy as np
 from deepface import DeepFace
 
@@ -214,10 +214,20 @@ def mostrarEmocao(agrupamentos, janelaBarra=None):
                     os.makedirs(pasta_pessoa, exist_ok=True)
                     pasta_emocao = os.path.join(pasta_pessoa, emotion)
                     os.makedirs(pasta_emocao, exist_ok=True)
-                    nome_arquivo = f"{emotion}_{len(os.listdir(pasta_emocao))+1}.jpg"
-                    caminho_arquivo = os.path.join(pasta_emocao, nome_arquivo)
 
-                    cv2.imwrite(caminho_arquivo, img_rosto)
+                    num_arquivo = len([f for f in os.listdir(pasta_emocao) if emotion in f and "tela" not in f]) + 1
+
+                    # Nomes dos arquivos
+                    nome_webcam = f"{emotion}_{num_arquivo}.jpg"       # webcam
+                    nome_tela = f"tela_{emotion}_{num_arquivo}.jpg"   # tela
+
+                    caminho_webcam = os.path.join(pasta_emocao, nome_webcam)
+                    caminho_tela = os.path.join(pasta_emocao, nome_tela)
+
+                    # Salvar webcam e tela sincronizadas
+                    cv2.imwrite(caminho_webcam, frame)
+                    cv2.imwrite(caminho_tela, tela)
+
                 else:
                     label = "Pessoa nao reconhecida"
 
