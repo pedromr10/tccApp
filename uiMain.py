@@ -1,10 +1,13 @@
 # IMPORTS:
-import tkinter as tk
-from tkinter import ttk
+import customtkinter as ctk
 import threading
 import os, cv2, mss, time
 import numpy as np
 from deepface import DeepFace
+
+# Configuração do customtkinter (apenas UI)
+ctk.set_appearance_mode("dark")
+ctk.set_default_color_theme("blue")
 
 # Criar dataset, antes de tudo:
 dir = "Dataset"
@@ -16,6 +19,21 @@ configFile = "deploy.prototxt"
 net = cv2.dnn.readNetFromCaffe(configFile, modelFile)
 
 # FUNCOES:
+def mostrarInfos():
+    janelaInfo = ctk.CTkToplevel()
+    janelaInfo.title("Informações do projeto")
+    janelaInfo.geometry("600x350")
+    janelaInfo.configure(fg_color="#3e4e60")
+    textoInfo = ctk.CTkLabel(janelaInfo, text="Objetivo:\nO projeto tem como objetivo identificar sentimentos e\n expressões faciais de jogadores durante partidas de jogos digitais, por meio da \ncaptura de imagens via webcam. A proposta é disponibilizar uma ferramenta \nque facilite a criação de datasets com dados dos jogadores e das partidas, sem a \nnecessidade de desenvolver jogos próprios para a análise.", font=("Roboto", 16),
+                      text_color="white")
+    textoInfo.pack(pady=10)
+    textoIntegr = ctk.CTkLabel(janelaInfo, text="Integrantes:\n+ Alan Daiki Suga\n+ Gustavo Gomes Barbosa\n+ Pedro Munhoz Rosin", font=("Roboto", 16),
+                      text_color="white")
+    textoIntegr.pack(pady=10)
+    textoOrie = ctk.CTkLabel(janelaInfo, text="Orientador:\n+ Prof. Dr. Fagner de Assis Moura Pimentel", font=("Roboto", 16),
+                      text_color="white")
+    textoOrie.pack(pady=10)
+
 def detectarCamera():
     for i in range(5):
         cap = cv2.VideoCapture(i, cv2.CAP_DSHOW)
@@ -122,20 +140,20 @@ def criarDataset(nome):
         janelaQtdCapturas.destroy()
         iniciar_captura(qtd)
 
-    janelaQtdCapturas = tk.Toplevel()
+    janelaQtdCapturas = ctk.CTkToplevel()
     janelaQtdCapturas.title("Quantidade de capturas desejadas")
     janelaQtdCapturas.geometry("600x400")
-    janelaQtdCapturas.configure(bg="#3e4e60")
+    janelaQtdCapturas.configure(fg_color="#3e4e60")
 
-    tk.Label(janelaQtdCapturas, text="Quantidade de capturas: ", font=("Arial", 36),
-             bg="#3e4e60", fg="white").pack(pady=10)
+    ctk.CTkLabel(janelaQtdCapturas, text="Quantidade de capturas: ", font=("Roboto", 36),
+                 text_color="white").pack(pady=10)
 
-    qtdInserida = tk.Entry(janelaQtdCapturas, font=("Arial", 36), bg="#3e4e60", fg="white")
+    qtdInserida = ctk.CTkEntry(janelaQtdCapturas, font=("Roboto", 36), fg_color="#3e4e60", text_color="white")
     qtdInserida.pack(pady=10)
 
-    tk.Button(janelaQtdCapturas, text="Iniciar", font=("Arial", 36),
-              command=lambda: barraDeCarregamento(iniciar_captura_de_verdade),
-              bg="#3e4e60", fg="white").pack(pady=10)
+    ctk.CTkButton(janelaQtdCapturas, text="Iniciar", font=("Roboto", 36),
+                  command=lambda: barraDeCarregamento(iniciar_captura_de_verdade),
+                  fg_color="#3e4e60", text_color="white").pack(pady=10)
 
 def treinarDataset(janelaBarra=None):
 
@@ -260,16 +278,15 @@ def reconhecimentoEmocao(janelaBarra=None):
 
 # Barra de carregamento
 def barraDeCarregamento(func, *args):
-    janelaBarraDeCarregamento = tk.Toplevel()
+    janelaBarraDeCarregamento = ctk.CTkToplevel()
     janelaBarraDeCarregamento.title("Carregando...")
     janelaBarraDeCarregamento.geometry("600x100")
-    janelaBarraDeCarregamento.configure(bg="#3e4e60")
+    janelaBarraDeCarregamento.configure(fg_color="#3e4e60")
 
-    tk.Label(janelaBarraDeCarregamento, text="Por favor, aguarde alguns instantes...",
-             font=("Arial", 20), bg="#3e4e60", fg="white").pack(pady=10)
+    ctk.CTkLabel(janelaBarraDeCarregamento, text="Por favor, aguarde alguns instantes...",
+                 font=("Roboto", 20), text_color="white").pack(pady=10)
 
-    barra = ttk.Progressbar(janelaBarraDeCarregamento, orient="horizontal",
-                            length=300, mode="indeterminate")
+    barra = ctk.CTkProgressBar(janelaBarraDeCarregamento, mode="indeterminate", width=300)
     barra.pack(pady=5)
     barra.start()
 
@@ -284,39 +301,45 @@ def barraDeCarregamento(func, *args):
 
 #CODIGO DA UI:
 # Tela Inicial:
-janela = tk.Tk()
+janela = ctk.CTk()
 janela.title("Ferramenta facilitadora de criacao de datasets")
 janela.geometry("650x400")
-janela.configure(bg="#3e4e60")
+janela.configure(fg_color="#3e4e60")
 
 # Título:
-titulo = tk.Label(janela, text="Ferramenta facilitadora\nde criação de datasets", font=("Arial", 24))
+titulo = ctk.CTkLabel(janela, text="Ferramenta facilitadora\nde criação de datasets", font=("Roboto", 24),
+                      text_color="white")
 titulo.pack(pady=10)
-titulo.configure(bg="#3e4e60", fg="white")
 
 # nome usuario:
-nomeusu = tk.Label(janela, text="Digite seu nome:", font=("Arial", 16))
+nomeusu = ctk.CTkLabel(janela, text="Digite seu nome:", font=("Roboto", 16), text_color="white")
 nomeusu.pack(pady=10)
-nomeusu.configure(bg="#3e4e60", fg="white")
 
 # Nome do Usuário:
-nome = tk.Entry(janela, font=("Arial", 20))
+nome = ctk.CTkEntry(janela, font=("Roboto", 20), fg_color="#667f98", text_color="white",width=250)
 nome.pack(pady=10)
-nome.configure(bg="#667f98", fg="white")
 
 #Botao Criar Dataset:
-botaoDataset = tk.Button(janela, font=("Arial", 16), text="Criar Dataset", command=lambda: criarDataset(nome.get()))
+botaoDataset = ctk.CTkButton(janela, font=("Roboto", 16), text="Criar Dataset",
+                             command=lambda: criarDataset(nome.get()),
+                             fg_color="#667f98", text_color="white")
 botaoDataset.pack(pady=10)
-botaoDataset.configure(bg="#667f98", fg="white")
 
 #botao para treinar o dataset para reconhecimento de perfil (pro deepface saber que vc é vc!!!):
-botaoTreinamento = tk.Button(janela, font=("Arial", 16), text= "Treinar dataset", command=lambda: barraDeCarregamento(treinarDataset))
+botaoTreinamento = ctk.CTkButton(janela, font=("Roboto", 16), text= "Treinar dataset",
+                                 command=lambda: barraDeCarregamento(treinarDataset),
+                                 fg_color="#667f98", text_color="white")
 botaoTreinamento.pack(pady=10)
-botaoTreinamento.configure(bg="#667f98", fg="white")
 
 # Botão Mostrar Emoções:
-botaoEmocao = tk.Button(janela, font=("Arial", 16), text="Iniciar Reconhecimento", command=lambda: barraDeCarregamento(reconhecimentoEmocao))
+botaoEmocao = ctk.CTkButton(janela, font=("Roboto", 16), text="Iniciar Reconhecimento",
+                             command=lambda: barraDeCarregamento(reconhecimentoEmocao),
+                             fg_color="#667f98", text_color="white")
 botaoEmocao.pack(pady=10)
-botaoEmocao.configure(bg="#667f98", fg="white")
+
+#botao de informacoes:
+
+botaoInfo = ctk.CTkButton(janela, font=("Roboto", 16), text="Informações", fg_color="#667f98", text_color="white", command=lambda: mostrarInfos())
+botaoInfo.pack(pady=10)
 
 janela.mainloop()
