@@ -148,12 +148,12 @@ def criarDataset(nome):
     ctk.CTkLabel(janelaQtdCapturas, text="Quantidade de capturas: ", font=("Roboto", 36),
                  text_color="white").pack(pady=10)
 
-    qtdInserida = ctk.CTkEntry(janelaQtdCapturas, font=("Roboto", 36), fg_color="#3e4e60", text_color="white")
+    qtdInserida = ctk.CTkEntry(janelaQtdCapturas, font=("Roboto", 36), fg_color="#667f98", text_color="white")
     qtdInserida.pack(pady=10)
 
     ctk.CTkButton(janelaQtdCapturas, text="Iniciar", font=("Roboto", 36),
                   command=lambda: barraDeCarregamento(iniciar_captura_de_verdade),
-                  fg_color="#3e4e60", text_color="white").pack(pady=10)
+                  fg_color="#667f98", text_color="white").pack(pady=10)
 
 def treinarDataset(janelaBarra=None):
 
