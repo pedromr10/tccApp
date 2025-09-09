@@ -18,6 +18,8 @@ modelFile = "res10_300x300_ssd_iter_140000.caffemodel"
 configFile = "deploy.prototxt"
 net = cv2.dnn.readNetFromCaffe(configFile, modelFile)
 
+rodandoReconhecimentoEmocao = False
+
 # FUNCOES:
 def mostrarInfos():
     janelaInfo = ctk.CTkToplevel()
@@ -33,6 +35,10 @@ def mostrarInfos():
     textoOrie = ctk.CTkLabel(janelaInfo, text="Orientador:\n+ Prof. Dr. Fagner de Assis Moura Pimentel", font=("Roboto", 16),
                       text_color="white")
     textoOrie.pack(pady=10)
+
+    janelaInfo.lift()
+    janelaInfo.attributes("-topmost", True)
+    janelaInfo.after(100, lambda: janelaInfo.attributes("-topmost", False))
 
 def detectarCamera():
     for i in range(5):
@@ -154,6 +160,10 @@ def criarDataset(nome):
     ctk.CTkButton(janelaQtdCapturas, text="Iniciar", font=("Roboto", 36),
                   command=lambda: barraDeCarregamento(iniciar_captura_de_verdade),
                   fg_color="#667f98", text_color="white").pack(pady=10)
+    
+    janelaQtdCapturas.lift()
+    janelaQtdCapturas.attributes("-topmost", True)
+    janelaQtdCapturas.after(100, lambda: janelaQtdCapturas.attributes("-topmost", False))
 
 def treinarDataset(janelaBarra=None):
 
@@ -173,9 +183,13 @@ def treinarDataset(janelaBarra=None):
 
     np.save("embedding.npy", agrupamento)
     print("Treinamento finalizado.")
+
     return agrupamento
 
 def mostrarEmocao(agrupamentos, janelaBarra=None):
+    global rodandoReconhecimentoEmocao
+
+    botaoParar.configure(state="normal")
 
     if janelaBarra:
         janelaBarra.destroy()
@@ -185,15 +199,17 @@ def mostrarEmocao(agrupamentos, janelaBarra=None):
         print("Nenhuma câmera disponível")
         return
 
-    # Capturar tela
     sct = mss.mss()
     monitor = sct.monitors[1]
 
-    while True:
+    rodandoReconhecimentoEmocao = True
 
+    while rodandoReconhecimentoEmocao:
+        # Captura tela
         tela = np.array(sct.grab(monitor))
         tela = cv2.cvtColor(tela, cv2.COLOR_BGRA2BGR)
 
+        # Captura webcam
         ret, frame = captura.read()
         if not ret:
             print("Falha na captura de imagem")
@@ -203,18 +219,16 @@ def mostrarEmocao(agrupamentos, janelaBarra=None):
 
         for (x, y, w, h) in rostos:
             img_rosto = frame[y:y+h, x:x+w]
-            cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
             try:
+                # Reconhecimento de emoção
                 analysis = DeepFace.analyze(img_rosto, actions=["emotion"], enforce_detection=False)
                 if isinstance(analysis, list):
                     analysis = analysis[0]
-
                 emotion = max(analysis["emotion"], key=analysis["emotion"].get)
+                print(f"Emoção detectada: {emotion}")
 
-                #print da emocao detectada no cmd, para verificacao:
-                print("Emocao detectada: " + emotion)
-
+                # Reconhecimento de pessoa
                 face_embedding = DeepFace.represent(img_rosto, model_name="Facenet", enforce_detection=False)[0]["embedding"]
 
                 match = None
@@ -235,39 +249,24 @@ def mostrarEmocao(agrupamentos, janelaBarra=None):
 
                     num_arquivo = len([f for f in os.listdir(pasta_emocao) if emotion in f and "tela" not in f]) + 1
 
-                    # Nomes dos arquivos
-                    nome_webcam = f"{emotion}_{num_arquivo}.jpg"       # webcam
-                    nome_tela = f"tela_{emotion}_{num_arquivo}.jpg"   # tela
+                    caminho_webcam = os.path.join(pasta_emocao, f"{emotion}_{num_arquivo}.jpg")
+                    caminho_tela = os.path.join(pasta_emocao, f"tela_{emotion}_{num_arquivo}.jpg")
 
-                    caminho_webcam = os.path.join(pasta_emocao, nome_webcam)
-                    caminho_tela = os.path.join(pasta_emocao, nome_tela)
-
-                    # Salvar webcam e tela sincronizadas
                     cv2.imwrite(caminho_webcam, frame)
                     cv2.imwrite(caminho_tela, tela)
-
                 else:
-                    label = "Pessoa nao reconhecida"
-
-                display_text = f"Nome: {label} | Emocao: {emotion}"
-                cv2.putText(frame, display_text, (x, y - 10),
-                            cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+                    print("Pessoa não reconhecida")
 
             except Exception as e:
-                print("Nao foi possivel reconhecer rosto: ", e)
+                print("Não foi possível reconhecer rosto: ", e)
 
-        h_webcam, w_webcam = 400, 460
-        webcam_resized = cv2.resize(frame, (w_webcam, h_webcam))
-
-        tela[0:h_webcam, 0:w_webcam] = webcam_resized
-
-        cv2.imshow("Reconhecimento facial", tela)
-
+        # Pressione Q para sair
         if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+            rodando = False
 
     captura.release()
     cv2.destroyAllWindows()
+
 
 def reconhecimentoEmocao(janelaBarra=None):
     if os.path.exists("embedding.npy"):
@@ -299,11 +298,21 @@ def barraDeCarregamento(func, *args):
 
     threading.Thread(target=tarefa).start()
 
+    janelaBarraDeCarregamento.lift()
+    janelaBarraDeCarregamento.attributes("-topmost", True)
+    janelaBarraDeCarregamento.after(100, lambda: janelaBarraDeCarregamento.attributes("-topmost", False))
+
+# Parar reconhecimento emocao
+def pararReconhecimento():
+    global rodandoReconhecimentoEmocao
+    rodandoReconhecimentoEmocao = False
+    botaoParar.configure(state="disabled")
+
 #CODIGO DA UI:
 # Tela Inicial:
 janela = ctk.CTk()
 janela.title("Ferramenta facilitadora de criacao de datasets")
-janela.geometry("650x400")
+janela.geometry("650x500")
 janela.configure(fg_color="#3e4e60")
 
 # Título:
@@ -337,8 +346,11 @@ botaoEmocao = ctk.CTkButton(janela, font=("Roboto", 16), text="Iniciar Reconheci
                              fg_color="#667f98", text_color="white")
 botaoEmocao.pack(pady=10)
 
-#botao de informacoes:
+# Botão parar reconhecimento
+botaoParar = ctk.CTkButton(janela, font=("Roboto", 16), text="Parar Reconhecimento", fg_color="#667f98", text_color="white", state="disabled", command=lambda: pararReconhecimento())
+botaoParar.pack(pady=10)
 
+#botao de informacoes:
 botaoInfo = ctk.CTkButton(janela, font=("Roboto", 16), text="Informações", fg_color="#667f98", text_color="white", command=lambda: mostrarInfos())
 botaoInfo.pack(pady=10)
 

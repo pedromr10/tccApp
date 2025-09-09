@@ -5,6 +5,7 @@
 - Cv2
 - yolo
 - mss
+- customtkinter
 
 * Terminal codes:
 1. 2.19.0 TensorFlow download: pip install tensorflow
