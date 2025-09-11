@@ -115,7 +115,7 @@ def criarDataset(nome):
                 #salvamento da imagem mais clara:
                 cv2.imwrite(caminho_rosto_claro, img_clara)
                 #salvamento da imagem mais escura:
-                cv2.imwrite(caminho_rosto_claro, img_escura)
+                cv2.imwrite(caminho_rosto_escuro, img_escura)
 
                 qtdCapturas -= 1
 
@@ -167,6 +167,9 @@ def criarDataset(nome):
 
 def treinarDataset(janelaBarra=None):
 
+    if janelaBarra:
+        janelaBarra.destroy()
+
     agrupamento = {}
     for i in os.listdir(dir):
         usuario = os.path.join(dir, i)
@@ -189,10 +192,25 @@ def treinarDataset(janelaBarra=None):
 def mostrarEmocao(agrupamentos, janelaBarra=None):
     global rodandoReconhecimentoEmocao
 
-    botaoParar.configure(state="normal")
+    botaoParar.configure(state="normal", corner_radius=7)
 
+    # CORRIGIR, NÃO ESTÁ SENDO ACESSADO
     if janelaBarra:
         janelaBarra.destroy()
+
+        janelaStatus = ctk.CTkToplevel()
+        janelaStatus.title("Reconhecimento")
+        janelaStatus.geometry("600x100")
+        janelaStatus.configure(fg_color="#3e4e60", corner_radius=15)
+
+        ctk.CTkLabel(janelaStatus,
+                     text="Reconhecimento iniciado e em andamento...",
+                     font=("Roboto", 20),
+                     text_color="white").pack(pady=20)
+
+        janelaStatus.lift()
+        janelaStatus.attributes("-topmost", True)
+        janelaStatus.after(100, lambda: janelaStatus.attributes("-topmost", False))
 
     captura = detectarCamera()
     if captura is None:
@@ -306,7 +324,7 @@ def barraDeCarregamento(func, *args):
 def pararReconhecimento():
     global rodandoReconhecimentoEmocao
     rodandoReconhecimentoEmocao = False
-    botaoParar.configure(state="disabled")
+    botaoParar.configure(state="disabled", corner_radius=7)
 
 #CODIGO DA UI:
 # Tela Inicial:
@@ -347,7 +365,7 @@ botaoEmocao = ctk.CTkButton(janela, font=("Roboto", 16), text="Iniciar Reconheci
 botaoEmocao.pack(pady=10)
 
 # Botão parar reconhecimento
-botaoParar = ctk.CTkButton(janela, font=("Roboto", 16), text="Parar Reconhecimento", fg_color="#667f98", text_color="white", state="disabled", command=lambda: pararReconhecimento())
+botaoParar = ctk.CTkButton(janela, font=("Roboto", 16), text="Parar Reconhecimento", fg_color="#667f98", text_color="white", state="disabled", corner_radius=7, command=lambda: pararReconhecimento())
 botaoParar.pack(pady=10)
 
 #botao de informacoes:
