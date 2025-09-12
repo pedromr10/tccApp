@@ -79,11 +79,19 @@ def criarDataset(nome):
         
         contNome = 1
         usuario = os.path.join(dir, f"{nomeBase}_{contNome}")
+        
         while os.path.exists(usuario):
             contNome += 1
             usuario = os.path.join(dir, f"{nomeBase}_{contNome}")
 
         os.makedirs(usuario, exist_ok=True)
+        #aqui é onde é criada uma pasta chamada reconhecimento dentro de cada usuario, onde serao adicionadas outras duas subpastas:
+        pasta_reconhecimento = os.path.join(usuario, "reconhecimento")
+        os.makedirs(pasta_reconhecimento, exist_ok=True)    
+        pasta_screenPrint = os.path.join(pasta_reconhecimento, "screenPrint")
+        os.makedirs(pasta_screenPrint, exist_ok=True)    
+        pasta_facePrint = os.path.join(pasta_reconhecimento, "facePrint")
+        os.makedirs(pasta_facePrint, exist_ok=True)   
 
         captura = detectarCamera()
         if captura is None:
@@ -195,7 +203,6 @@ def mostrarEmocao(agrupamentos, janelaBarra=None):
     global rodandoReconhecimentoEmocao
 
     botaoParar.configure(state="normal", corner_radius=7)
-
     # CORRIGIR, NÃO ESTÁ SENDO ACESSADO
     if janelaBarra:
         janelaBarra.destroy()
@@ -239,9 +246,9 @@ def mostrarEmocao(agrupamentos, janelaBarra=None):
 
         for (x, y, w, h) in rostos:
             img_rosto = frame[y:y+h, x:x+w]
-
+            
             try:
-                # Reconhecimento de emoção
+                #AQUI É ONDE SERÁ FEITA O SALVAMENTO DA EMOCAO EM UM ARQUIVO TXT, JUNTAMENTE COM O RESULTADO DO YOLO:
                 analysis = DeepFace.analyze(img_rosto, actions=["emotion"], enforce_detection=False)
                 if isinstance(analysis, list):
                     analysis = analysis[0]
