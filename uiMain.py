@@ -24,17 +24,19 @@ rodandoReconhecimentoEmocao = False
 def mostrarInfos():
     janelaInfo = ctk.CTkToplevel()
     janelaInfo.title("Informações do projeto")
-    janelaInfo.geometry("600x350")
+    janelaInfo.geometry("600x450")
     janelaInfo.configure(fg_color="#3e4e60")
-    textoInfo = ctk.CTkLabel(janelaInfo, text="Objetivo:\nO projeto tem como objetivo identificar sentimentos e\n expressões faciais de jogadores durante partidas de jogos digitais, por meio da \ncaptura de imagens via webcam. A proposta é disponibilizar uma ferramenta \nque facilite a criação de datasets com dados dos jogadores e das partidas, sem a \nnecessidade de desenvolver jogos próprios para a análise.", font=("Roboto", 16),
-                      text_color="white")
+    textoInfo = ctk.CTkLabel(janelaInfo, text="Objetivo:\nO projeto tem como objetivo identificar sentimentos e\n expressões faciais de jogadores durante partidas de jogos digitais, por meio da \ncaptura de imagens via webcam. A proposta é disponibilizar uma ferramenta \nque facilite a criação de datasets com dados dos jogadores e das partidas, sem a \nnecessidade de desenvolver jogos próprios para a análise.", font=("Roboto", 16),text_color="white")
     textoInfo.pack(pady=10)
-    textoIntegr = ctk.CTkLabel(janelaInfo, text="Integrantes:\n+ Alan Daiki Suga\n+ Gustavo Gomes Barbosa\n+ Pedro Munhoz Rosin", font=("Roboto", 16),
-                      text_color="white")
+
+    textoIntegr = ctk.CTkLabel(janelaInfo, text="Integrantes:\n+ Alan Daiki Suga\n+ Gustavo Gomes Barbosa\n+ Pedro Munhoz Rosin", font=("Roboto", 16),text_color="white")
     textoIntegr.pack(pady=10)
-    textoOrie = ctk.CTkLabel(janelaInfo, text="Orientador:\n+ Prof. Dr. Fagner de Assis Moura Pimentel", font=("Roboto", 16),
-                      text_color="white")
+
+    textoOrie = ctk.CTkLabel(janelaInfo, text="Orientador:\n+ Prof. Dr. Fagner de Assis Moura Pimentel", font=("Roboto", 16),text_color="white")
     textoOrie.pack(pady=10)
+
+    textoUso = ctk.CTkLabel(janelaInfo, text="Passo a passo para uso:\n1- Digite o nome do usuario;\n2- Clique no botao de treinar dataset;\n3- Digite o número de capturas e prossiga;\n4- Clique em treinar dataset;\n5- Clique em iniciar reconhecimento para iniciar o processo;\n6- Para parar o processo, clique em parar reconhecimento.", font=("Roboto", 16),text_color="white")
+    textoUso.pack(pady=10)
 
     janelaInfo.lift()
     janelaInfo.attributes("-topmost", True)
