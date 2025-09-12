@@ -248,7 +248,6 @@ def mostrarEmocao(agrupamentos, janelaBarra=None):
             img_rosto = frame[y:y+h, x:x+w]
             
             try:
-                #AQUI É ONDE SERÁ FEITA O SALVAMENTO DA EMOCAO EM UM ARQUIVO TXT, JUNTAMENTE COM O RESULTADO DO YOLO:
                 analysis = DeepFace.analyze(img_rosto, actions=["emotion"], enforce_detection=False)
                 if isinstance(analysis, list):
                     analysis = analysis[0]
@@ -273,6 +272,14 @@ def mostrarEmocao(agrupamentos, janelaBarra=None):
                     os.makedirs(pasta_pessoa, exist_ok=True)
                     pasta_emocao = os.path.join(pasta_pessoa, emotion)
                     os.makedirs(pasta_emocao, exist_ok=True)
+
+                    #salvamento das emocoes do usuario no arquivo txt:
+                    pasta_reconhecimento = os.path.join(pasta_pessoa, "reconhecimento")
+                    os.makedirs(pasta_reconhecimento, exist_ok=True)    
+                    arquivo_emocoes = os.path.join(pasta_reconhecimento, "emocoes.txt")
+                    with open(arquivo_emocoes, "a", encoding="utf-8") as f:
+                        f.write(f"{emotion}\n")
+
 
                     num_arquivo = len([f for f in os.listdir(pasta_emocao) if emotion in f and "tela" not in f]) + 1
 
