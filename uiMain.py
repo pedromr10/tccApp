@@ -272,22 +272,22 @@ def mostrarEmocao(agrupamentos, janelaBarra=None):
                     os.makedirs(pasta_pessoa, exist_ok=True)
                     pasta_emocao = os.path.join(pasta_pessoa, emotion)
                     os.makedirs(pasta_emocao, exist_ok=True)
-
-                    #salvamento das emocoes do usuario no arquivo txt:
                     pasta_reconhecimento = os.path.join(pasta_pessoa, "reconhecimento")
-                    os.makedirs(pasta_reconhecimento, exist_ok=True)    
+                    os.makedirs(pasta_reconhecimento, exist_ok=True)
                     arquivo_emocoes = os.path.join(pasta_reconhecimento, "emocoes.txt")
                     with open(arquivo_emocoes, "a", encoding="utf-8") as f:
                         f.write(f"{emotion}\n")
-
-
+                    pasta_facePrint = os.path.join(pasta_reconhecimento, "facePrint")
+                    os.makedirs(pasta_facePrint, exist_ok=True)
                     num_arquivo = len([f for f in os.listdir(pasta_emocao) if emotion in f and "tela" not in f]) + 1
-
+                    num_screen = len(os.listdir(pasta_facePrint)) + 1
                     caminho_webcam = os.path.join(pasta_emocao, f"{emotion}_{num_arquivo}.jpg")
                     caminho_tela = os.path.join(pasta_emocao, f"tela_{emotion}_{num_arquivo}.jpg")
-
+                    caminho_screen = os.path.join(pasta_facePrint, f"webcam_{num_screen}.jpg")
                     cv2.imwrite(caminho_webcam, frame)
                     cv2.imwrite(caminho_tela, tela)
+                    cv2.imwrite(caminho_screen, frame)
+
                 else:
                     print("Pessoa não reconhecida")
 
