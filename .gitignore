@@ -5,3 +5,6 @@ app/models/_pycache_/
 estrutura.txt
 estruturaDB.txt
 *.csv
+*.png
+*.jpg
+.*jpeg
